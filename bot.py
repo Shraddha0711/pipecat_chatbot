@@ -79,6 +79,19 @@ class TalkingAnimation(FrameProcessor):
 
         await self.push_frame(frame)
 
+class TranscriptionCollector(FrameProcessor):
+    def __init__(self):
+        super().__init__()
+        self.transcripts = []
+
+    async def process_frame(self, frame: Frame, direction: FrameDirection):
+        await super().process_frame(frame, direction)
+
+        if isinstance(frame, TranscriptionFrame):
+            self.transcripts.append(frame.transcription)
+
+        await self.push_frame(frame)
+
 
 async def main(url, token, config_b64):
     async with aiohttp.ClientSession() as session:
@@ -146,6 +159,7 @@ async def main(url, token, config_b64):
         context_aggregator = llm.create_context_aggregator(context)
 
         ta = TalkingAnimation()
+        tc = TranscriptionCollector()
 
         pipeline = Pipeline(
             [
@@ -154,6 +168,7 @@ async def main(url, token, config_b64):
                 llm,
                 tts,
                 ta,
+                tc,
                 transport.output(),
                 context_aggregator.assistant(),
             ]
