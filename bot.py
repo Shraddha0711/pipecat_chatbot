@@ -44,7 +44,7 @@ db = firestore.client()
 async def save_in_db(room_id, transcript):
     doc_ref = db.collection("Transcription").document(room_id)
     data={
-        "prompt":transcript
+        "transcript":transcript
     }
     doc_ref.set(data)
     print(f"Agent {room_id} created succesfully.")
